@@ -1,0 +1,4 @@
+applications:
+  - name: EmotionRecognition
+    random-route: true
+    memory: 256M
