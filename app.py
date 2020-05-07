@@ -73,9 +73,6 @@ def redirect_url(default='index'):
 def back():
     return redirect(redirect_url())
 
+port = int(os.getenv('PORT', '80'))
 if __name__ == '__main__':
-    app.run(
-        host="127.0.0.1",
-        port=int("5000"),
-        debug=True
-    )
+    app.run(host='0.0.0.0', port=port, debug=True)
