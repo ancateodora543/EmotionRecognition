@@ -17,7 +17,6 @@ from sample import get_landmarks
 from sample import data
 
 emotions = ["afraid", "angry", "disgusted", "happy", "neutral", "sad", "surprised"] 
-model_emotion = pickle.load(open('finalized_model.sav', 'rb'))
 detector = dlib.get_frontal_face_detector() #Face detector
 predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat") #Landmark identifier. Set the filename to whatever you named the downloaded file
 ESC = 27
@@ -73,13 +72,15 @@ def start_webcam_linear(model_emotion, window_size, window_name='live', update_t
     cv2.destroyWindow(window_name)
 
 
-def analyze_picture_linear(path):
+def analyze_picture_linear(model_emotion, path, window_size, window_name='static'):
     training_data = []
     f = open("result_image.txt", "w")
     f.truncate(0)
-    folder='uploads/'
-    image = cv2.imread(os.path.join(folder, path))
-    print(os.path.join(folder, path))
+    cv2.namedWindow(window_name, WINDOW_NORMAL)
+    if window_size:
+        width, height = window_size
+        cv2.resizeWindow(window_name, width, height)
+    image = cv2.imread(path, 1)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
     clahe_image = clahe.apply(gray)
@@ -89,24 +90,33 @@ def analyze_picture_linear(path):
         print("no face detected on this one")
     else:
         training_data.append(da) #append image array to training data list
-        
+        print(training_data)
     for k,d in enumerate(detections): #For all detected face instances individually
         emotion_prediction = model_emotion.predict(training_data)
+        print(emotion_prediction[0])
         emotion_probability = model_emotion.predict_proba(training_data)
+        print(emotion_probability)
         print(d.left(), d.top(), d.right(), d.bottom())
         cv2.rectangle(image,(d.left(), d.top()),(d.right(), d.bottom()),(0,0,255),3)
-        cv2.putText(image, emotions[emotion_prediction[0]], (d.left(), d.top()-10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
+        index_max = np.argmax(emotion_probability[0])
+        print(index_max)
+        cv2.putText(image, emotions[index_max], (d.left(), d.top()-10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
         for i in range(6):
                 for j in range(1):
                     f.write(emotions[i])
                     f.write(": ")
                     f.write(str(emotion_probability[j][i]))
                     f.write("\n")
-    cv2.imwrite(os.path.join(folder, path),image)
+    cv2.imshow(window_name, image)
+    key = cv2.waitKey(0)
+    if key == ESC:
+        cv2.destroyWindow(window_name)
     f.close()
-    return path
+    return image
 
 if __name__ == '__main__':
+    emotions = ["afraid", "angry", "disgusted", "happy", "neutral", "sad", "surprised"] 
+    loaded_model = pickle.load(open('finalized_model.sav', 'rb'))
     run_loop = True
     window_name = "Facifier Static (press ESC to exit)"
     print("Default path is set to data/sample/")
@@ -121,14 +131,14 @@ if __name__ == '__main__':
         print("Default path is set to data/sample/")
         print("Type q or quit to end program")
         while run_loop:
-            path = "images/"
+            path = "../data/sample/"
             file_name = input("Specify image file: ")
             if file_name == "q" or file_name == "quit":
                 run_loop = False
             else:
                 path += file_name
                 if os.path.isfile(path):
-                    analyze_picture_linear(path)
+                    analyze_picture_linear(loaded_model, path, window_size=(1280, 720), window_name=window_name)
                 else:
                     print("File not found!")
     else:

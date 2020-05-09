@@ -1,0 +1,13 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: emotion-recognition-ingress
+spec:
+  rules:
+  - host: emotionrecognition.eu-gb.containers.appdomain.cloud
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: emotion-recognition
+          servicePort: 5000

@@ -18,7 +18,7 @@ clf = SVC(kernel='linear', probability=True, tol=1e-5, verbose = False) #Set the
 data = {} 
 
 def get_files(emotion): #Define function to get file list, randomly shuffle it and split 80/20
-    files = glob.glob("../data/emotion/%s/*" %emotion)
+    files = glob.glob("data/emotion/%s/*" %emotion)
     random.shuffle(files)
     training = files[:int(len(files)*0.8)] #get first 80% of file list
     prediction = files[-int(len(files)*0.2):] #get last 20% of file list

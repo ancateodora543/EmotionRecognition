@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: emotion-recognition
+  labels:
+    app: emotion-recognition
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: emotion-recognition
+  template:
+    metadata:
+      labels:
+        app: emotion-recognition
+    spec:
+      containers:
+      - name: emotion-recognition
+        image: uk.icr.io/emotion/emotion-recognition:latest
+        ports:
+        - containerPort: 5000
+        imagePullPolicy: Always
